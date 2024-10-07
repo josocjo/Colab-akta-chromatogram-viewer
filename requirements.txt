@@ -1,2 +1,4 @@
 xmltodict
 xlsxwriter
+numpy
+pandas
