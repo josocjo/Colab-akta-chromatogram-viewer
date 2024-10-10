@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 
 
-def ploty_graph(df,html=True,name="",show=True):
+def unicorn_ploty_graph(df):
   uv_color = "#1f77b4"
   ph_color = "#2ca772"
   cond_color = "#f29d5f"
@@ -113,9 +113,29 @@ def ploty_graph(df,html=True,name="",show=True):
       width=1200,
       height=600
   )
-
-  if html:
-    fig.write_html(f"{name}_chromatogram.html")
   
-  if show:
-    fig.show()
+  return fig
+
+
+
+def annotate_fraction(fig,frac_df,rectangle=True,text=True):
+  for index, row in frac_df.iterrows():
+    if rectangle:
+      fig.add_shape(type="rect",
+                    x0=row["Start_mL"], y0=0, x1=row["End_mL"], y1=row["Max_UV"],
+                    line=dict(color="RoyalBlue",width=1),
+                    )
+
+    if text:
+      fig.add_annotation(
+                        go.layout.Annotation(x=(row["Start_mL"]+row["End_mL"])/2,
+                        y=0,
+                        xref="x",
+                        yref="y",
+                        text=row["Fraction_Start"],
+                        align='center',
+                        showarrow=False,
+                        yanchor='top',
+                        textangle=90))
+      fig.update_shapes(dict(xref='x', yref='y'))
+  return fig

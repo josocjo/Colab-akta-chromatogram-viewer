@@ -3,3 +3,5 @@ xlsxwriter
 numpy
 pandas
 plotly
+cv2
+scipy
