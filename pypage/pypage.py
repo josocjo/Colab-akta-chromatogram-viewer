@@ -24,7 +24,7 @@ def detect_and_correct_tilt(image):
     # 回転後の画像サイズを計算
     cos = np.abs(rot_mat[0, 0])
     sin = np.abs(rot_mat[0, 1])
-    new_w = int((image.shape[0] * sin) + (image.shape[1] * cos))
+    new_w = int((image.shape[0] * sin) + (image.shape[1] * cos)) +50
     new_h = int((image.shape[0] * cos) + (image.shape[1] * sin))
 
     # 平行移動を調整
@@ -67,23 +67,48 @@ def detect_lanes(image, expected_lane_width=30):
             # 近接したレーンは平均化
             final_lanes[-1] = (final_lanes[-1] + center) // 2
 
-    final_lanes =insert_mean(np.array(final_lanes),image.shape[1]).astype(int)
+    final_lanes =insert_mean(np.array(final_lanes),expected_lane_width,image.shape[1]).astype(int)
 
     return final_lanes
 
-def insert_mean(arr,maximum,minimum=0):
+
+def get_edges(image):
+  # ノイズ除去（メディアンフィルタ）
+  image = cv2.medianBlur(image, 5)
+  # Sobelフィルタを適用
+  sobel_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=5)               # 垂直方向の勾配
+
+  # 勾配の絶対値を計算
+  sobel_y = cv2.convertScaleAbs(sobel_y)
+  return sobel_y
+
+  
+
+def insert_mean(arr,lane_width,maximum,minimum=0):
     """各数字の間に平均を挿入し、最小値と最大値まで平均差分で埋める"""
     n = len(arr)
-    if n <= 1:  # 1要素以下の配列の場合はそのまま返す
-        return arr
-    means = (arr[:-1] + arr[1:]) / 2
-    new_arr = np.concatenate((arr, means)) # concatenateで連結
+    append_arr = []
+    for i in range(n-1):
+      if arr[i] + lane_width*1.1 > arr[i+1]:
+        continue
+      
+      else:
+        non_arr_n = (arr[i+1] - arr[i])//lane_width
+        for k in range(non_arr_n-1):
+          append_arr.append( arr[i] + k * (arr[i+1] - arr[i]) / non_arr_n)
+
+
+    #if n <= 1:  # 1要素以下の配列の場合はそのまま返す
+    #    return arr
+    #means = (arr[:-1] + arr[1:]) / 2
+    #new_arr = np.concatenate((arr, means)) # concatenateで連結
+    new_arr = np.concatenate((arr, append_arr))
     new_arr = np.sort(new_arr)
 
     mean_size = np.mean(np.diff(new_arr))
 
-    low_arr = np.arange(arr[0], minimum, -mean_size)
-    high_arr = np.arange(arr[-1], maximum, mean_size)
+    low_arr = np.arange(new_arr[0], minimum, -mean_size)
+    high_arr = np.arange(new_arr[-1], maximum, mean_size)
 
     new_arr = np.concatenate((low_arr[1:], new_arr[:-1], high_arr))
 
@@ -102,3 +127,6 @@ def process_cbb_image(image_path, expected_lane_width=50):
     lanes = detect_lanes(corrected_image, expected_lane_width)
     result = draw_rectangles(corrected_image, lanes, expected_lane_width)
     return result
+
+def random_color():
+    return [int(c) for c in np.random.randint(0, 255, 3).astype(int)]
