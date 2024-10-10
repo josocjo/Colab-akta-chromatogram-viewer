@@ -106,7 +106,6 @@ def get_fraction_rectangle(frac_df):
                 "Start_mL": start_ml,
                 "End_mL": end_ml,
                 "Max_UV": max_uv*1.05,
-                "index": (start_ml, end_ml)
             })
 
         except IndexError:

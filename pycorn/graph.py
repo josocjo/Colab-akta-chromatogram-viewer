@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+import seaborn as sns
 
 
 def unicorn_ploty_graph(df):
@@ -118,12 +119,19 @@ def unicorn_ploty_graph(df):
 
 
 
-def annotate_fraction(fig,frac_df,rectangle=True,text=True):
-  for index, row in frac_df.iterrows():
+def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None):
+  
+  if not palette:
+    palette = sns.color_palette("Blues", len(frac_df))
+
+
+  for i,(index, row) in enumerate(frac_df.iterrows()):
     if rectangle:
+      color = f"rgb({int(palette[i][0]*255)},{int(palette[i][1]*255)},{int(palette[i][2]*255)})"
+
       fig.add_shape(type="rect",
                     x0=row["Start_mL"], y0=0, x1=row["End_mL"], y1=row["Max_UV"],
-                    line=dict(color="RoyalBlue",width=1),
+                    line=dict(color=color,width=2),
                     )
 
     if text:
