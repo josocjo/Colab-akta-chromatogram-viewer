@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from scipy.signal import find_peaks
 from scipy.ndimage import gaussian_filter1d
+import seaborn as sns
+import copy
 
 def detect_and_correct_tilt(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -25,7 +27,7 @@ def detect_and_correct_tilt(image):
     cos = np.abs(rot_mat[0, 0])
     sin = np.abs(rot_mat[0, 1])
     new_w = int((image.shape[0] * sin) + (image.shape[1] * cos)) +50
-    new_h = int((image.shape[0] * cos) + (image.shape[1] * sin))
+    new_h = int((image.shape[0] * cos) + (image.shape[1] * sin)) +50
 
     # 平行移動を調整
     rot_mat[0, 2] += (new_w / 2) - center[0]
@@ -84,7 +86,7 @@ def get_edges(image):
 
   
 
-def insert_mean(arr,lane_width,maximum,minimum=0):
+def insert_mean(arr,lane_width,maximum,minimum=0,mergin=1.1):
     """各数字の間に平均を挿入し、最小値と最大値まで平均差分で埋める"""
     n = len(arr)
     append_arr = []
@@ -93,8 +95,8 @@ def insert_mean(arr,lane_width,maximum,minimum=0):
         continue
       
       else:
-        non_arr_n = (arr[i+1] - arr[i])//lane_width
-        for k in range(non_arr_n-1):
+        non_arr_n = (arr[i+1] - arr[i])//(lane_width*mergin)
+        for k in range(1,int(non_arr_n)):
           append_arr.append( arr[i] + k * (arr[i+1] - arr[i]) / non_arr_n)
 
 
@@ -114,11 +116,27 @@ def insert_mean(arr,lane_width,maximum,minimum=0):
 
     return np.sort(new_arr)
 
-def draw_rectangles(image, lanes, lane_width=30):
+def draw_rectangles(image, lanes, lane_width=30,palette_dict=None,annotations=None):
+
+    if not palette_dict:
+      palette = sns.color_palette("Set1", len(lanes))
+      annotations = list(range(len(lanes)))
+      palette_dict = {a:p for a,p in zip(annotations,palette)}
+
+    if not annotations:
+      annotations = list(range(len(lanes)))
+
     result = image.copy()
     height, width = image.shape[:2]
-    for lane in lanes:
-        cv2.rectangle(result, (int(lane-lane_width//2), 0), (int(lane+lane_width//2), height), random_color(), 2)
+    i=0
+    for label,lane in zip(annotations,lanes):
+        if not label in palette_dict.keys():
+          continue
+        
+        color = [int(c*255) for c in palette_dict[label]]
+
+        cv2.rectangle(result, (int(lane-lane_width//2), 0), (int(lane+lane_width//2), height), color, 2)
+        cv2.putText(result, f"{label}", (int(lane-lane_width//2),25), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
     return result
 
 def process_cbb_image(image_path, expected_lane_width=50):
@@ -127,6 +145,8 @@ def process_cbb_image(image_path, expected_lane_width=50):
     lanes = detect_lanes(corrected_image, expected_lane_width)
     result = draw_rectangles(corrected_image, lanes, expected_lane_width)
     return result
+
+
 
 def random_color():
     return [int(c) for c in np.random.randint(0, 255, 3).astype(int)]
