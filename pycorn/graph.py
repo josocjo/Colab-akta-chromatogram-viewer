@@ -2,6 +2,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import seaborn as sns
 from copy import copy
+from pypage import pypage
 
 
 def unicorn_ploty_graph(df):
@@ -113,7 +114,11 @@ def unicorn_ploty_graph(df):
       font=dict(
         size=24,
       ),
-      title_text="Chromatogram",
+      title=dict(text='Chromatogram',
+                 font=dict(size=24),
+                  x=0.5,
+                  xanchor='center'
+                ),
       width=1280,
       height=720,
       legend=dict(
@@ -176,7 +181,38 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
 def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_dict=None,annotations=None):
 
   fig = px.imshow(image)
-  
+  height, width = image.shape[:2]
+  fig.update_layout(
+      template="plotly_white",
+      title=dict(text='CBB stain',
+                 font=dict(size=24),
+                  x=0.5,
+                  y=0.95,
+                  xanchor='center',
+                  #yanchor="bottom"
+                ),
+      width=width,
+      height=height
+  )  
+
+  fig.update_layout(
+    # プロットの背景を透明に
+    plot_bgcolor='rgba(0,0,0,0)',
+    # 図全体の背景を透明に（必要に応じて）
+    paper_bgcolor='rgba(0,0,0,0)',
+    # x軸の線を消す
+    xaxis=dict(
+        showline=False,
+        showgrid=False,
+        zeroline=False,
+    ),
+    # y軸の線を消す
+    yaxis=dict(
+        showline=False,
+        showgrid=False,
+        zeroline=False,
+    )
+  )
   if not palette_dict:
       palette = sns.color_palette("Set1", len(lanes))
       annotations = list(range(len(lanes)))
@@ -185,7 +221,6 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
   if not annotations:
       annotations = list(range(len(lanes)))
 
-  height, width = image.shape[:2]
   i=0
   for label,lane in zip(annotations,lanes):
     if not label in palette_dict.keys():
@@ -194,16 +229,17 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
     color = f"rgb({int(palette_dict[label][0]*255)},{int(palette_dict[label][1]*255)},{int(palette_dict[label][2]*255)})"
 
     if rectangle:
+      lane_coord = pypage.get_lane(image,lane,lane_width=50)
       
       fig.add_shape(type="rect",
-                    x0=lane-lane_width//2, y0=0, x1=lane+lane_width//2, y1=height,
+                    x0=lane_coord.x0, y0=lane_coord.y0, x1=lane_coord.x1, y1=lane_coord.y1,
                     line=dict(color=color,width=2),
                     )
 
     if text:
       fig.add_annotation(
                         go.layout.Annotation(
-                            x=lane, y=0,
+                            x=lane, y=100,
                             xref="x",
                             yref="y",
                             text=f"{label}",
@@ -212,7 +248,7 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
                             yanchor='bottom',
                             textangle=90,
                             font=dict(
-                            size=12,
+                            size=18,
                             ),
                             bgcolor=color,
                             opacity=0.8))

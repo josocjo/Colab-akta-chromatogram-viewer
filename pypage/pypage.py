@@ -1,9 +1,16 @@
 import cv2
 import numpy as np
 from scipy.signal import find_peaks
+from scipy import signal
 from scipy.ndimage import gaussian_filter1d
 import seaborn as sns
-import copy
+from copy import copy
+
+import plotly.express as px
+import plotly.graph_objects as go
+
+from pycorn import graph
+from pyspectrum.spectrum import CorrectSpec
 
 def detect_and_correct_tilt(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -33,8 +40,13 @@ def detect_and_correct_tilt(image):
     rot_mat[0, 2] += (new_w / 2) - center[0]
     rot_mat[1, 2] += (new_h / 2) - center[1]
 
+    
+
     # 白背景で回転
-    return cv2.warpAffine(image, rot_mat, (new_w, new_h), borderValue=(255,255,255))
+    warp_image =  cv2.warpAffine(image, rot_mat, (new_w, new_h), borderValue=(255,255,255))
+    image = np.full((100,new_w,3),255)
+    image = np.concatenate([image,warp_image]).astype(np.uint8)
+    return image
 
 def detect_lanes(image, expected_lane_width=30):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -74,6 +86,25 @@ def detect_lanes(image, expected_lane_width=30):
     return final_lanes
 
 
+class Lane:
+  def __init__(self,x0,y0,x1,y1):
+    self.x0 = x0
+    self.y0 = y0
+    self.x1 = x1
+    self.y1 = y1
+
+
+
+def get_lane(image,lane_x,lane_width=50,mergin=0,start=100):
+  height, width = image.shape[:2]
+
+  x0 = lane_x-lane_width//2 -mergin
+  y0=start 
+  x1=lane_x+lane_width//2 +mergin
+  y1=height
+  return Lane(x0,y0,x1,y1)
+
+
 def get_edges(image):
   # ノイズ除去（メディアンフィルタ）
   image = cv2.medianBlur(image, 5)
@@ -107,53 +138,153 @@ def insert_mean(arr,lane_width,maximum,minimum=0,mergin=1.1):
     new_arr = np.concatenate((arr, append_arr))
     new_arr = np.sort(new_arr)
 
-    mean_size = np.mean(np.diff(new_arr))
+    mean_size = np.median(np.diff(new_arr))
 
     low_arr = np.arange(new_arr[0], minimum, -mean_size)
     high_arr = np.arange(new_arr[-1], maximum, mean_size)
 
     new_arr = np.sort(np.concatenate((low_arr[1:], new_arr[:-1], high_arr)))
 
-    if new_arr[0] - lane_width/2 < 0:
+    if new_arr[0] - (lane_width/2)*0.9 < 0:
       new_arr = new_arr[1:]
     
-    if new_arr[-1] + lane_width/2 > maximum:
+    if new_arr[-1] + (lane_width/2)*0.9 > maximum:
       new_arr = new_arr[:-1]
 
     return np.sort(new_arr)
 
-def draw_rectangles(image, lanes, lane_width=30,palette_dict=None,annotations=None):
-
-    if not palette_dict:
-      palette = sns.color_palette("Set1", len(lanes))
-      annotations = list(range(len(lanes)))
-      palette_dict = {a:p for a,p in zip(annotations,palette)}
-
-    if not annotations:
-      annotations = list(range(len(lanes)))
-
-    result = image.copy()
-    height, width = image.shape[:2]
-    i=0
-    for label,lane in zip(annotations,lanes):
-        if not label in palette_dict.keys():
-          continue
-        
-        color = [int(c*255) for c in palette_dict[label]]
-
-        cv2.rectangle(result, (int(lane-lane_width//2), 0), (int(lane+lane_width//2), height), color, 2)
-        cv2.rectangle(result, (int(lane-lane_width//2), height-50), (int(lane+lane_width//2), height), color, -1)
-        cv2.putText(result, f"{label}", (int(lane-lane_width//2),25), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
-    return result
-
-def process_cbb_image(image_path, expected_lane_width=50):
-    image = cv2.imread(image_path)
-    corrected_image = detect_and_correct_tilt(image)
-    lanes = detect_lanes(corrected_image, expected_lane_width)
-    result = draw_rectangles(corrected_image, lanes, expected_lane_width)
-    return result
 
 
+class PageImage:
+  def __init__(self,image_path,lane_width=50):
+    self.image_ = cv2.imread(image_path)
+    self.lane_width = lane_width
+    self.image = detect_and_correct_tilt(self.image_)
+    self.lanes = detect_lanes(self.image, self.lane_width)
+    self.annotations = None
 
-def random_color():
-    return [int(c) for c in np.random.randint(0, 255, 3).astype(int)]
+  def annotate_lanes(self,annotations):
+    self.annotations = annotations
+    assert len(self.lanes) == len(self.annotations)
+
+  def imshow(self):
+    fig = px.imshow(self.image_)
+    return fig
+  
+  def check_image(self):
+    fig = graph.annotate_page(self.image, self.lanes, self.lane_width)
+    return fig
+
+  def annotated_imshow(self,palette_dict=None,rectangle=True,text=True):
+    fig = graph.annotate_page(self.image, self.lanes, self.lane_width,rectangle=rectangle,text=text,palette_dict=palette_dict,annotations=self.annotations)
+    return fig
+
+  def get_lane(self,index=None,name=None,mergin=0,start=0):
+    if index:
+      lane = index
+    elif name:
+      lane =self.annotations.index(name)
+
+    lane_x = self.lanes[lane]
+    lane_coord = get_lane(self.image,lane_x,self.lane_width,mergin=mergin,start=start)
+    return self.image[lane_coord.y0:lane_coord.y1,lane_coord.x0:lane_coord.x1,]
+
+
+class Marker:
+  def __init__(self, marker_image,standard_n=13):
+    self.marker_image = marker_image
+    self.peak_index = self.get_marker(standard_n)
+    self.peak_annotation = []
+
+
+  def get_marker(self, standard_n=13):
+    marker_sum = self.marker_image.sum(axis=1).sum(axis=1)*-1
+    corrector = CorrectSpec(lam=10**5,p=0.001,dn=20,poly=5)
+    marker_sum  = corrector.clean_spec(marker_sum)
+
+    for i in range(1,100,1):
+      peak_index = signal.argrelmax(marker_sum, order=i)[0]
+      if len(peak_index) <= standard_n:break
+
+    return peak_index
+
+
+  def check(self):
+    fig = px.imshow(self.marker_image)
+    for i,y in enumerate(self.peak_index):
+      fig.add_annotation(go.layout.Annotation(
+                        x=0, y=y,
+                        xref="x",
+                        yref="y",
+                        text=f"{i}",
+                        align='right',
+                        xanchor="right",
+                        showarrow=False,
+                        font=dict(
+                        size=12,
+                        ),
+                        ))
+    fig.update_shapes(dict(xref='x', yref='y'))
+    fig.update_layout(coloraxis_showscale=False)
+    fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+    return fig
+
+  def annotate(self,annotation):
+    self.annotation = annotation
+    assert len(self.annotation) == len(self.peak_index)
+
+
+def write_marker(fig,marker):
+
+  fig = copy(fig)
+
+  for index,text in zip(marker.peak_index,marker.annotation):
+    fig.add_annotation(go.layout.Annotation(
+                      x=0, y=index,
+                      xref="x",
+                      yref="y",
+                      text=f"{text}",
+                      align='left',
+                      xanchor="left",
+                      showarrow=False,
+                      font=dict(
+                      size=18,
+                      ),
+                      ))
+  
+  fig.add_annotation(go.layout.Annotation(
+                      x=0, y=100,
+                      xref="x",
+                      yref="y",
+                      text="(kDa)",
+                      align='left',
+                      xanchor="left",
+                      yanchor="bottom",
+                      showarrow=False,
+                      font=dict(
+                      size=18,
+                      ),
+                      ))
+
+  return fig
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
