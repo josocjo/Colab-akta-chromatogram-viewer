@@ -115,4 +115,20 @@ def get_fraction_rectangle(frac_df):
     return pd.DataFrame(fraction_indices)
 
 
+def pooling_fraction(df,pooling,name="pool"):
+  assert not name in df["Fraction_Start"].values
+
+  df = df.copy()
+
+  pool = df[df["Fraction_Start"].isin(pooling)]
+
+  start_ml = pool["Start_mL"].min()
+  end_ml = pool["End_mL"].max()
+  max_uv = pool["Max_UV"].max()
+
+  df = df.loc[[i for i in df.index if not i in pool.index]]
+  df.loc[pool.index[0]] = (name,start_ml,end_ml,max_uv)
+  return df.sort_values("Start_mL")
+
+
 
