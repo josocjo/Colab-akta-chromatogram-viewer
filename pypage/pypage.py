@@ -27,7 +27,7 @@ def detect_and_correct_tilt(image):
     cos = np.abs(rot_mat[0, 0])
     sin = np.abs(rot_mat[0, 1])
     new_w = int((image.shape[0] * sin) + (image.shape[1] * cos)) +50
-    new_h = int((image.shape[0] * cos) + (image.shape[1] * sin)) +50
+    new_h = int((image.shape[0] * cos) + (image.shape[1] * sin))
 
     # 平行移動を調整
     rot_mat[0, 2] += (new_w / 2) - center[0]
@@ -112,7 +112,13 @@ def insert_mean(arr,lane_width,maximum,minimum=0,mergin=1.1):
     low_arr = np.arange(new_arr[0], minimum, -mean_size)
     high_arr = np.arange(new_arr[-1], maximum, mean_size)
 
-    new_arr = np.concatenate((low_arr[1:], new_arr[:-1], high_arr))
+    new_arr = np.sort(np.concatenate((low_arr[1:], new_arr[:-1], high_arr)))
+
+    if new_arr[0] - lane_width/2 < 0:
+      new_arr = new_arr[1:]
+    
+    if new_arr[-1] + lane_width/2 > maximum:
+      new_arr = new_arr[:-1]
 
     return np.sort(new_arr)
 
@@ -136,6 +142,7 @@ def draw_rectangles(image, lanes, lane_width=30,palette_dict=None,annotations=No
         color = [int(c*255) for c in palette_dict[label]]
 
         cv2.rectangle(result, (int(lane-lane_width//2), 0), (int(lane+lane_width//2), height), color, 2)
+        cv2.rectangle(result, (int(lane-lane_width//2), height-50), (int(lane+lane_width//2), height), color, -1)
         cv2.putText(result, f"{label}", (int(lane-lane_width//2),25), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
     return result
 
