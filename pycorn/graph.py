@@ -111,21 +111,23 @@ def unicorn_ploty_graph(df):
   )
   fig.update_layout(
       template="plotly_white",
+      plot_bgcolor='rgba(0,0,0,0)',
       font=dict(
         size=24,
       ),
       title=dict(text='Chromatogram',
                  font=dict(size=24),
-                  x=0.5,
+                  x=0.2,
                   xanchor='center'
                 ),
       width=1280,
       height=720,
       legend=dict(
-          yanchor="top",
-          y=0.99,
-          xanchor="left",
-          x=0.05
+          yanchor="bottom",
+          y=1,
+          xanchor="right",
+          x=0.8,
+          font=dict(size=12),
       ))
   
   return fig
