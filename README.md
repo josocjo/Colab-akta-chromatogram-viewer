@@ -1,10 +1,12 @@
-# PyCORN
+# proteovis
 
 <!-- # Short Description -->
 
 1. pycorn: extract data (zip) from ÄKTA/UNICORN and create chromatograms plotly.
 2. pypage: Annotate SDS-PAGE images, automatically input marker size and add lane information.
 3. combine these two together to visualize the fractions and lanes connected in AKTA.
+
+![proteovis](resources/sample.png)
 
 <!-- # Badges -->
 
