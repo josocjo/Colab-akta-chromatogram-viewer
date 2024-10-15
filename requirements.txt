@@ -3,6 +3,6 @@ xlsxwriter
 numpy
 pandas
 plotly
-cv2
+opencv-python
 scipy
 seaborn
