@@ -15,9 +15,6 @@
 [![Github license](https://img.shields.io/github/license/Tsuchihashi-ryo/PyCORN)](https://github.com/Tsuchihashi-ryo/PyCORN/)
 
 # Demo
-
-![Demo](resources/file-4-0.png)
-
 ```python
 import proteovis as pv
 
@@ -28,7 +25,7 @@ df = pv.pycorn.utils.get_series_from_data(data,["UV 1_280","UV 2_254","Cond","pH
 fig = pv.graph.unicorn_ploty_graph(df)
 fig.show() 
 ```
-![Demo](resources/file-4-1.png)
+![Demo](resources/file-4-0.png)
 
 ```python
 frac_df = pv.pycorn.utils.get_fraction_rectangle(df)
@@ -62,23 +59,29 @@ palette = sns.color_palette("rainbow", len(frac_df))
 fig2,use_color_palette = pv.graph.annotate_fraction(fig,frac_df,palette=palette,annotations=cbb_list)
 fig2.show() 
 ``` 
-![Demo](resources/file-4-2.png)
-
+![Demo](resources/file-4-1.png)
 
 ```python
 use_color_palette["input"] = (0.9,0.9,0.9)
 
 cbb = pv.pypage.PageImage("/content/PyCORN/samples/cbb.jpg",lane_width=50)
 cbb.annotate_lanes(cbb_list)
+cbb.check_image()
 
 fig = cbb.annotated_imshow(use_color_palette,rectangle=True)
-
+fig.show()
 
 marker = cbb.get_lane(name="marker",start=0)
 marker = pv.pypage.Marker(marker)
+marker.check()
 
 marker.annotate([198,"","",98,62,"",49,38,28,"","",17,14])
+pv.pypage.write_marker(fig,marker)
 ```
+![Demo](resources/file-4-2.png)
+
+
+
 
 # Deployment
 
