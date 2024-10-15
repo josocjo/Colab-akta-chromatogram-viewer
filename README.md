@@ -16,6 +16,16 @@
 [![Github top language](https://img.shields.io/github/languages/top/Tsuchihashi-ryo/PyCORN)](https://github.com/Tsuchihashi-ryo/PyCORN/)
 [![Github license](https://img.shields.io/github/license/Tsuchihashi-ryo/PyCORN)](https://github.com/Tsuchihashi-ryo/PyCORN/)
 
+
+# install
+
+```
+!git clone git@github.com:Tsuchihashi-ryo/PyCORN.git
+
+%cd PyCORN
+!pip install .
+```
+
 # Demo
 ```python
 import proteovis as pv
@@ -85,14 +95,7 @@ pv.pypage.write_marker(fig,marker)
 
 
 
-# Deployment
 
-```
-!git clone git@github.com:Tsuchihashi-ryo/PyCORN.git
-
-%cd PyCORN
-!pip install .
-```
 
 
 # Contributors
