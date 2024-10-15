@@ -20,9 +20,9 @@
 # install
 
 ```
-!git clone git@github.com:Tsuchihashi-ryo/PyCORN.git
+!git clone git@github.com:Tsuchihashi-ryo/proteovis.git
 
-%cd PyCORN
+%cd proteovis
 !pip install .
 ```
 
