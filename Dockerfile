@@ -19,7 +19,7 @@ RUN pip install --upgrade setuptools
 
 COPY . .
 
-RUN pip install .
+RUN pip install requirements.txt
 
 # Streamlit が使用するポートを開放
 EXPOSE 8501
