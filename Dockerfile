@@ -1,5 +1,6 @@
 FROM python:3.10.15-slim
-USER root
+
+WORKDIR /app
 
 RUN apt-get update
 RUN apt-get -y install locales && \
@@ -14,7 +15,11 @@ RUN apt-get install -y vim less
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
-RUN python -m pip install .
+
+
+COPY . .
+
+RUN pip install .
 
 # Streamlit が使用するポートを開放
 EXPOSE 8501
