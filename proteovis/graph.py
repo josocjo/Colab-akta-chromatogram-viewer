@@ -215,18 +215,24 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
         zeroline=False,
     )
   )
-  if not palette_dict:
-      palette = sns.color_palette("Set1", len(lanes))
-      annotations = list(range(len(lanes)))
-      palette_dict = {a:p for a,p in zip(annotations,palette)}
 
   if not annotations:
       annotations = list(range(len(lanes)))
+
+  if not palette_dict:
+      palette = sns.color_palette("Set1", len(lanes))
+      #annotations = list(range(len(lanes)))
+      palette_dict = {a:p for a,p in zip(annotations,palette)}
+
+
 
   i=0
   for label,lane in zip(annotations,lanes):
     if not label in palette_dict.keys():
         continue
+    
+    if label == "":
+      continue
 
     color = f"rgb({int(palette_dict[label][0]*255)},{int(palette_dict[label][1]*255)},{int(palette_dict[label][2]*255)})"
 
