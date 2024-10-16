@@ -1,4 +1,4 @@
-FROM 3.10.15-slim
+FROM python:3.10.15-slim
 USER root
 
 RUN apt-get update
