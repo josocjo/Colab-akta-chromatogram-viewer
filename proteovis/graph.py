@@ -129,6 +129,10 @@ def unicorn_ploty_graph(df):
           x=0.8,
           font=dict(size=12),
       ))
+
+
+
+  
   
   return fig
 
@@ -143,6 +147,9 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
   
   use_color_palette = {}
 
+  shapes = []
+  texts = []
+
   for i,(index, row) in enumerate(frac_df.iterrows()):
     if annotations:
       if not row["Fraction_Start"] in annotations:
@@ -153,14 +160,14 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
 
     if rectangle:
       
-      fig.add_shape(type="rect",
+      shapes.append(dict(type="rect",
                     x0=row["Start_mL"], y0=0, x1=row["End_mL"], y1=row["Max_UV"],
                     line=dict(color=color,width=2),
-                    )
+                    ))
 
     if text:
-      fig.add_annotation(
-                        go.layout.Annotation(x=(row["Start_mL"]+row["End_mL"])/2,
+      texts.append(dict(
+                        x=(row["Start_mL"]+row["End_mL"])/2,
                         y=0,
                         xref="x",
                         yref="y",
@@ -175,7 +182,52 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
                         bgcolor=color,
 
                         opacity=0.8))
-      fig.update_shapes(dict(xref='x', yref='y'))
+
+  # shapesとannotationsを追加
+  fig.update_layout(
+      shapes=shapes,
+      annotations=texts
+  )                  
+  fig.update_shapes(dict(xref='x', yref='y'))
+
+  fig.update_layout(
+  updatemenus=[
+      dict(
+          type="buttons",
+          direction="down",
+          x=0.9,
+          y=1.15,
+          showactive=True,
+          active=0,
+          font=dict(size=12),
+          buttons=[
+              dict(
+                  args=[{f"shapes[{k}].visible": True for k in range(len(shapes))}],
+                  args2=[{f"shapes[{k}].visible": False for k in range(len(shapes))}],
+                  label="Rectangle ☑",
+                  method="relayout"
+              ),
+          ]
+      ),
+      dict(
+          type="buttons",
+          direction="down",
+          x=1.0,
+          y=1.15,
+          showactive=True,
+          active=0,
+          font=dict(size=12),
+          buttons=[
+              dict(
+                  args=[{f"annotations[{k}].visible": True for k in range(len(texts))}],
+                  args2=[{f"annotations[{k}].visible": False for k in range(len(texts))}],
+                  label="Annotation ☑",
+                  method="relayout"
+              ),
+          ]
+      )
+  ],
+  )
   return fig,use_color_palette
 
 
@@ -225,7 +277,8 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
       palette_dict = {a:p for a,p in zip(annotations,palette)}
 
 
-
+  shapes = []
+  texts = []
   i=0
   for label,lane in zip(annotations,lanes):
     if not label in palette_dict.keys():
@@ -239,14 +292,13 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
     if rectangle:
       lane_coord = pypage.get_lane(image,lane,lane_width=50)
       
-      fig.add_shape(type="rect",
+      shapes.append(dict(type="rect",
                     x0=lane_coord.x0, y0=lane_coord.y0, x1=lane_coord.x1, y1=lane_coord.y1,
                     line=dict(color=color,width=2),
-                    )
+                    ))
 
     if text:
-      fig.add_annotation(
-                        go.layout.Annotation(
+      texts.append(dict(
                             x=lane, y=100,
                             xref="x",
                             yref="y",
@@ -260,9 +312,57 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
                             ),
                             bgcolor=color,
                             opacity=0.8))
-  fig.update_shapes(dict(xref='x', yref='y'))
+
+                            
   fig.update_layout(coloraxis_showscale=False)
   fig.update_xaxes(showticklabels=False)
   fig.update_yaxes(showticklabels=False)
+
+    # shapesとannotationsを追加
+  fig.update_layout(
+      shapes=shapes,
+      annotations=texts
+  )                  
+  fig.update_shapes(dict(xref='x', yref='y'))
+  print("a")
+
+  fig.update_layout(
+  updatemenus=[
+      dict(
+          type="buttons",
+          direction="down",
+          x=0.9,
+          y=1.15,
+          showactive=True,
+          active=0,
+          font=dict(size=12),
+          buttons=[
+              dict(
+                  args=[{f"shapes[{k}].visible": True for k in range(len(shapes))}],
+                  args2=[{f"shapes[{k}].visible": False for k in range(len(shapes))}],
+                  label="Rectangle ☑",
+                  method="relayout"
+              ),
+          ]
+      ),
+      dict(
+          type="buttons",
+          direction="down",
+          x=1.0,
+          y=1.15,
+          showactive=True,
+          active=0,
+          font=dict(size=12),
+          buttons=[
+              dict(
+                  args=[{f"annotations[{k}].visible": True for k in range(len(texts))}],
+                  args2=[{f"annotations[{k}].visible": False for k in range(len(texts))}],
+                  label="Annotation ☑",
+                  method="relayout"
+              ),
+          ]
+      )
+  ],
+  )
 
   return fig
