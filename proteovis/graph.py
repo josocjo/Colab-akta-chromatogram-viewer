@@ -324,15 +324,14 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
       annotations=texts
   )                  
   fig.update_shapes(dict(xref='x', yref='y'))
-  print("a")
 
   fig.update_layout(
   updatemenus=[
       dict(
           type="buttons",
           direction="down",
-          x=0.9,
-          y=1.15,
+          x=1.1,
+          y=1.1,
           showactive=True,
           active=0,
           font=dict(size=12),
@@ -348,8 +347,8 @@ def annotate_page(image, lanes, lane_width=30,rectangle=True,text=True,palette_d
       dict(
           type="buttons",
           direction="down",
-          x=1.0,
-          y=1.15,
+          x=1.1,
+          y=1.2,
           showactive=True,
           active=0,
           font=dict(size=12),
