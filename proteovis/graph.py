@@ -1,3 +1,5 @@
+from numpy import shape
+from numpy.core import shape_base
 import plotly.graph_objects as go
 import plotly.express as px
 import seaborn as sns
@@ -5,74 +7,74 @@ from copy import copy
 from pypage import pypage
 
 
-def unicorn_ploty_graph(df):
+
+
+def unicorn_ploty_graph(df,first="UV 1_280",second="Cond",third="pH",forth="Conc B"):
   uv_color = "#1f77b4"
   ph_color = "#2ca772"
   cond_color = "#f29d5f"
   concb_color = "#b5b5b5"
 
+  UV = [c for c in df.columns if c[:2]=="UV"]
+
+  axis_label = {
+    UV[0]:f"UV {UV[0].split('_')[-1]}nm (mAU)",
+    UV[1]:f"UV {UV[1].split('_')[-1]}nm (mAU)",
+    UV[2]:f"UV {UV[2].split('_')[-1]}nm (mAU)",
+    'Cond':"Conductivity (mS/cm)",
+    'Conc B':"B Concentration (%)", 
+    'pH':"pH",
+    'System flow':"System flow (mL/min)",
+    'Sample flow':"System flow (mL/min)",
+    'PreC pressure':"PreC pressure (MPa)",
+    'System pressure':"System pressure (MPa)",
+    'Sample pressure':"Sample pressure (MPa)",
+  }
+
+
+
   fig = go.Figure()
 
   fig.add_trace(go.Scatter(
       x=df["mL"],
-      y=df["UV 1_280"],
+      y=df[first],
       yaxis="y",
       line=dict(
               color=uv_color
           ),
       fill = "tozeroy",
-      name="UV 280nm (mAU)"
+      name=axis_label[first]
   ))
-
-  fig.add_trace(go.Scatter(
-      x=df["mL"],
-      y=df["Cond"],
-      yaxis="y2",
-      line=dict(
-              color=cond_color
-          ),
-      name="Conductivity (mS/cm)",
-  ))
-
-  fig.add_trace(go.Scatter(
-      x=df["mL"],
-      y=df["pH"],
-      yaxis="y3",
-      line=dict(
-              color=ph_color
-          ),
-      name="pH"
-  ))
-
-  fig.add_trace(go.Scatter(
-      x=df["mL"],
-      y=df["Conc B"],
-      yaxis="y4",
-      name="B Concentration (%)",
-      line=dict(
-              color=concb_color
-          ),
-  ))
-
-
-
-  # Create axis objects
   fig.update_layout(
       xaxis=dict(
           domain=[0.05, 0.85],
           title="mL",
       ),
       yaxis=dict(
-          title="UV 280nm (mAU)",
+          title=axis_label[first],
           titlefont=dict(
               color=uv_color
           ),
           tickfont=dict(
               color=uv_color
           )
-      ),
-      yaxis2=dict(
-          title="Cond (mS/cm)",
+          )
+      )
+  
+  if second:
+    fig.add_trace(go.Scatter(
+        x=df["mL"],
+        y=df[second],
+        yaxis="y2",
+        line=dict(
+                color=cond_color
+            ),
+        name=axis_label[second]
+    ))
+
+    fig.update_layout(
+            yaxis2=dict(
+          title=axis_label[second],
           titlefont=dict(
               color=cond_color
           ),
@@ -81,10 +83,24 @@ def unicorn_ploty_graph(df):
           ),
           anchor="x",
           side="right",
-          overlaying="y"),
+          overlaying="y")
+    )
+    
+  
+  if third:
+    fig.add_trace(go.Scatter(
+        x=df["mL"],
+        y=df[third],
+        yaxis="y3",
+        line=dict(
+                color=ph_color
+            ),
+        name=axis_label[third]
+    ))
 
-      yaxis3=dict(
-          title="pH",
+    fig.update_layout(
+          yaxis3=dict(
+          title=axis_label[third],
           titlefont=dict(
               color=ph_color
           ),
@@ -94,10 +110,23 @@ def unicorn_ploty_graph(df):
           anchor="free",
           side="right",
           range=(2,12),
-          overlaying="y", autoshift=True),
-      
-      yaxis4=dict(
-          title="B Concentration (%)",
+          overlaying="y", autoshift=True)
+    )
+  
+  if forth: 
+    fig.add_trace(go.Scatter(
+        x=df["mL"],
+        y=df[forth],
+        yaxis="y4",
+        name=axis_label[forth],
+        line=dict(
+                color=concb_color
+            ),
+    ))
+
+    fig.update_layout(
+          yaxis4=dict(
+          title=axis_label[forth],
           titlefont=dict(
               color=concb_color,
           ),
@@ -107,26 +136,28 @@ def unicorn_ploty_graph(df):
           anchor="free",
           side="right",
           overlaying="y", autoshift=True),
+    )
 
-  )
+
+
   fig.update_layout(
       template="plotly_white",
       plot_bgcolor='rgba(0,0,0,0)',
       font=dict(
-        size=24,
+        size=14,
       ),
-      title=dict(text='Chromatogram',
-                 font=dict(size=24),
-                  x=0.2,
-                  xanchor='center'
-                ),
-      width=1280,
-      height=720,
+      #title=dict(text='Chromatogram',
+      #           font=dict(size=20),
+      #            x=0.2,
+      #            xanchor='center'
+      #          ),
+      width=640,
+      height=360,
       legend=dict(
           yanchor="bottom",
           y=1,
-          xanchor="right",
-          x=0.8,
+          xanchor="left",
+          x=0,
           font=dict(size=12),
       ))
 
@@ -138,7 +169,7 @@ def unicorn_ploty_graph(df):
 
 
 
-def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotations=None):
+def annotate_fraction(fig,frac_df,phase=None,rectangle=True,text=True,palette=None,annotations=None):
 
   fig =copy(fig)
   
@@ -177,26 +208,48 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
                         yanchor='top',
                         textangle=90,
                         font=dict(
-                        size=14
+                        size=10
                         ),
                         bgcolor=color,
 
                         opacity=0.8))
 
+
+  if phase is not None:
+    palette = sns.color_palette(n_colors=len(phase))
+
+    phase_shape = []
+    max_mL = frac_df["Max_UV"].max()
+    
+    for i,row in phase.iterrows():
+      color = f"rgb({int(palette[i][0]*255)},{int(palette[i][1]*255)},{int(palette[i][2]*255)})"
+      phase_shape.append(dict(type="rect",
+                      x0=row["Start_mL"], y0=0, x1=row["End_mL"], y1=max_mL,
+                      layer="below",
+                      line=dict(color=color,width=0),
+                      fillcolor=color,
+                      opacity=0.1
+                      ))
+
+
   # shapesとannotationsを追加
   fig.update_layout(
-      shapes=shapes,
+      shapes=shapes+phase_shape,
       annotations=texts
   )                  
   fig.update_shapes(dict(xref='x', yref='y'))
 
   fig.update_layout(
-  updatemenus=[
+    width=900,
+    height=580,
+    updatemenus=[
       dict(
           type="buttons",
           direction="down",
-          x=0.9,
-          y=1.15,
+          yanchor="bottom",
+          y=1.1,
+          xanchor="right",
+          x=0.85,
           showactive=True,
           active=0,
           font=dict(size=12),
@@ -204,7 +257,7 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
               dict(
                   args=[{f"shapes[{k}].visible": True for k in range(len(shapes))}],
                   args2=[{f"shapes[{k}].visible": False for k in range(len(shapes))}],
-                  label="Rectangle ☑",
+                  label="fraction box",
                   method="relayout"
               ),
           ]
@@ -212,8 +265,10 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
       dict(
           type="buttons",
           direction="down",
-          x=1.0,
-          y=1.15,
+          yanchor="bottom",
+          y=1.1,
+          xanchor="right",
+          x=1,
           showactive=True,
           active=0,
           font=dict(size=12),
@@ -221,7 +276,26 @@ def annotate_fraction(fig,frac_df,rectangle=True,text=True,palette=None,annotati
               dict(
                   args=[{f"annotations[{k}].visible": True for k in range(len(texts))}],
                   args2=[{f"annotations[{k}].visible": False for k in range(len(texts))}],
-                  label="Annotation ☑",
+                  label="fraction text",
+                  method="relayout"
+              ),
+          ]
+      ),
+      dict(
+          type="buttons",
+          direction="down",
+          yanchor="bottom",
+          y=1.1,
+          xanchor="right",
+          x=0.7,
+          showactive=True,
+          active=0,
+          font=dict(size=12),
+          buttons=[
+              dict(
+                  args=[{f"shapes[{k}].visible": True for k in range(len(shapes),len(shapes+phase_shape))}],
+                  args2=[{f"shapes[{k}].visible": False for k in range(len(shapes),len(shapes+phase_shape))}],
+                  label="phase",
                   method="relayout"
               ),
           ]

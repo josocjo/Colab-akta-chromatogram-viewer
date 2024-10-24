@@ -131,4 +131,38 @@ def pooling_fraction(df,pooling,name="pool"):
   return df.sort_values("Start_mL")
 
 
+def find_phase(df):
+  runlog = df[["mL","Run Log"]].dropna()
+  data = runlog["mL"].values
+  
+  # 隣接する要素との差分を計算
+  differences = np.diff(runlog["mL"])
+  # 差分の中央値を計算し、これをしきい値の基準とする
+  threshold = np.median(differences) * 10
+
+  # グループを作成
+  groups = []
+  current_group = [data[0]]
+  
+  # データを順に見ていき、差が大きい所でグループを分ける
+  for i in range(1, len(data)):
+      if differences[i-1] > threshold:
+          # 現在のグループの中央値を記録し、新しいグループを開始
+          groups.append(np.median(current_group))
+          current_group = []
+      current_group.append(data[i])
+  
+  # 最後のグループの中央値を追加
+  groups.append(np.median(current_group))
+
+  df = pd.DataFrame(columns=["Start_mL","End_mL"])
+
+  for i in range(len(groups)-1):
+    df.loc[i] = groups[i],groups[i+1]
+  
+  return df
+
+
+
+
 
