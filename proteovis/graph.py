@@ -109,7 +109,7 @@ def unicorn_ploty_graph(df,first="UV 1_280",second="Cond",third="pH",forth="Conc
           ),
           anchor="free",
           side="right",
-          range=(2,12),
+          #range=(2,12),
           overlaying="y", autoshift=True)
     )
   
@@ -151,8 +151,8 @@ def unicorn_ploty_graph(df,first="UV 1_280",second="Cond",third="pH",forth="Conc
       #            x=0.2,
       #            xanchor='center'
       #          ),
-      width=640,
-      height=360,
+      width=900,
+      height=540,
       legend=dict(
           yanchor="bottom",
           y=1,
@@ -216,38 +216,54 @@ def annotate_fraction(fig,frac_df,phase=None,rectangle=True,text=True,palette=No
 
 
   if phase is not None:
-    palette = sns.color_palette(n_colors=len(phase))
+    palette_phase = sns.color_palette(n_colors=len(phase))
 
-    phase_shape = []
-    max_mL = frac_df["Max_UV"].max()
+    phase_shapes = []
+    phase_texts = []
+    max_mL = frac_df["Max_UV"].max()*1.1
     
     for i,row in phase.iterrows():
-      color = f"rgb({int(palette[i][0]*255)},{int(palette[i][1]*255)},{int(palette[i][2]*255)})"
-      phase_shape.append(dict(type="rect",
+      color = f"rgb({int(palette_phase[i][0]*255)},{int(palette_phase[i][1]*255)},{int(palette_phase[i][2]*255)})"
+      phase_shapes.append(dict(type="rect",
                       x0=row["Start_mL"], y0=0, x1=row["End_mL"], y1=max_mL,
                       layer="below",
                       line=dict(color=color,width=0),
                       fillcolor=color,
                       opacity=0.1
                       ))
+      
+      if "Phase" in phase.columns:
+          phase_texts.append(dict(
+                        x=(row["Start_mL"]+row["End_mL"])/2,
+                        y=max_mL,
+                        xref="x",
+                        yref="y",
+                        text=row["Phase"],
+                        align='center',
+                        showarrow=False,
+                        yanchor='top',
+                        font=dict(
+                        size=12
+                        ),
+                        opacity=1))
 
 
   # shapesとannotationsを追加
   fig.update_layout(
-      shapes=shapes+phase_shape,
-      annotations=texts
+      shapes=shapes+phase_shapes,
+      annotations=texts+phase_texts
   )                  
   fig.update_shapes(dict(xref='x', yref='y'))
 
   fig.update_layout(
     width=900,
-    height=580,
+    height=600,
     updatemenus=[
       dict(
           type="buttons",
           direction="down",
           yanchor="bottom",
-          y=1.1,
+          y=1.05,
           xanchor="right",
           x=0.85,
           showactive=True,
@@ -266,7 +282,7 @@ def annotate_fraction(fig,frac_df,phase=None,rectangle=True,text=True,palette=No
           type="buttons",
           direction="down",
           yanchor="bottom",
-          y=1.1,
+          y=1.05,
           xanchor="right",
           x=1,
           showactive=True,
@@ -285,17 +301,36 @@ def annotate_fraction(fig,frac_df,phase=None,rectangle=True,text=True,palette=No
           type="buttons",
           direction="down",
           yanchor="bottom",
-          y=1.1,
+          y=1.15,
           xanchor="right",
-          x=0.7,
+          x=0.85,
           showactive=True,
           active=0,
           font=dict(size=12),
           buttons=[
               dict(
-                  args=[{f"shapes[{k}].visible": True for k in range(len(shapes),len(shapes+phase_shape))}],
-                  args2=[{f"shapes[{k}].visible": False for k in range(len(shapes),len(shapes+phase_shape))}],
-                  label="phase",
+                  args=[{f"shapes[{k}].visible": True for k in range(len(shapes),len(shapes+phase_shapes))}],
+                  args2=[{f"shapes[{k}].visible": False for k in range(len(shapes),len(shapes+phase_shapes))}],
+                  label="phase box",
+                  method="relayout"
+              ),
+          ]
+      ),
+         dict(
+          type="buttons",
+          direction="down",
+          yanchor="bottom",
+          y=1.15,
+          xanchor="right",
+          x=1,
+          showactive=True,
+          active=0,
+          font=dict(size=12),
+          buttons=[
+              dict(
+                  args=[{f"annotations[{k}].visible": True for k in range(len(texts),len(shapes+phase_texts))}],
+                  args2=[{f"annotations[{k}].visible": False for k in range(len(texts),len(shapes+phase_texts))}],
+                  label="phase text",
                   method="relayout"
               ),
           ]

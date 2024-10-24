@@ -133,6 +133,9 @@ def pooling_fraction(df,pooling,name="pool"):
 
 def find_phase(df):
   runlog = df[["mL","Run Log"]].dropna()
+  runlog = runlog[~runlog["Run Log"].str.contains("Data",na=True)]
+  #runlog = runlog[~runlog["Run Log"].str.contains("Issued",na=True)]
+
   data = runlog["mL"].values
   
   # 隣接する要素との差分を計算
