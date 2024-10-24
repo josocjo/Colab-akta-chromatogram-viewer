@@ -180,6 +180,8 @@ def annotate_fraction(fig,frac_df,phase=None,rectangle=True,text=True,palette=No
 
   shapes = []
   texts = []
+  phase_shapes = []
+  phase_texts = []
 
   for i,(index, row) in enumerate(frac_df.iterrows()):
     if annotations:
@@ -218,8 +220,7 @@ def annotate_fraction(fig,frac_df,phase=None,rectangle=True,text=True,palette=No
   if phase is not None:
     palette_phase = sns.color_palette(n_colors=len(phase))
 
-    phase_shapes = []
-    phase_texts = []
+   
     max_mL = frac_df["Max_UV"].max()*1.1
     
     for i,row in phase.iterrows():
