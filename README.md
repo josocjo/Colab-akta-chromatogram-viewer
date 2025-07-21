@@ -15,7 +15,7 @@ The app is built upon [proteovis](https://github.com/Tsuchihashi-ryo/proteovis),
 
 Click the badge below to open the app directly in Google Colab:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/josocjo/Colab-akta-chromatogram-viewer/blob/master/GUI_de_pycorn_funciona_v3_clean.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/josocjo/Colab-akta-chromatogram-viewer/blob/master/interactive_chromatogram_viewer.ipynb)
 
 ---
 
