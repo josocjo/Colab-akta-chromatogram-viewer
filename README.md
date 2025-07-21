@@ -11,13 +11,26 @@ The app is built upon [proteovis](https://github.com/Tsuchihashi-ryo/proteovis),
 
 ---
 
-## 📘 How to Use
+📘 How to Use
+Click the "Open in Colab" badge below to open the notebook.
 
-1. Click the "Open in Colab" badge below to launch the notebook.
-2. Upload your `.zip`, `.res`, or `.result` file when prompted.
-3. Use the interactive sliders and controls to adjust the chromatogram view.
-4. Optionally select a secondary Y-axis parameter (e.g., conductivity or pH).
-5. Analyze or export the resulting plots as needed.
+Press the ▶️ "Run" button on the 💻 Run interactive application cell.
+
+When prompted, click "Upload" and select your .zip, .res, or .result file exported from UNICORN.
+
+Once uploaded, the application will load your chromatogram and display interactive controls.
+
+Use the sliders and dropdown menus to:
+
+Zoom in on the UV curves (280 and 260 nm)
+
+Adjust axis ranges
+
+Show or hide fractions
+
+Select a second Y-axis parameter (e.g., conductivity or pH)
+
+The plot will update automatically as you change the parameters.
 
 ---
 
