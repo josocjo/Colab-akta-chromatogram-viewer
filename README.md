@@ -11,6 +11,16 @@ The app is built upon [proteovis](https://github.com/Tsuchihashi-ryo/proteovis),
 
 ---
 
+## 📘 How to Use
+
+1. Click the "Open in Colab" badge below to launch the notebook.
+2. Upload your `.zip`, `.res`, or `.result` file when prompted.
+3. Use the interactive sliders and controls to adjust the chromatogram view.
+4. Optionally select a secondary Y-axis parameter (e.g., conductivity or pH).
+5. Analyze or export the resulting plots as needed.
+
+---
+
 ## ▶️ Launch in Colab
 
 Click the badge below to open the app directly in Google Colab:
