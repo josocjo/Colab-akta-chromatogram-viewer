@@ -26,6 +26,14 @@ Click the badge below to open the app directly in Google Colab:
 
 ---
 
+
 ## 📝 License
 
-This viewer inherits the license from the original `proteovis` repository (MIT). Please refer to their repository for more details.
+This project is distributed under the **GNU General Public License v2.0 (GPL-2.0)**.
+
+It is based on:
+- [`PyCORN`](https://github.com/pyahmed/PyCORN) by [@pyahmed](https://github.com/pyahmed), licensed under GPL-2.0
+- [`proteovis`](https://github.com/Tsuchihashi-ryo/proteovis), a fork of PyCORN
+
+As a derivative work, this Colab app inherits the GPL-2.0 obligations. You are free to use, modify, and redistribute this project under the same license.
+
