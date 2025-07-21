@@ -1,40 +1,31 @@
-# AKTA Chromatogram Viewer
+# AKTA Chromatogram Viewer (Google Colab)
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/josocjo/akta-chromatogram-viewer/blob/main/viewer.ipynb)
+This project provides an interactive Google Colab interface for visualizing chromatograms from AKTA systems. It supports `.zip`, `.res`, and `.result` files exported from UNICORN software and allows fine control over:
 
-**Interactive Google Colab viewer for AKTA chromatograms**.  
-Allows uploading `.zip`, `.res`, or `.result` files from UNICORN systems and visualizing them with dual Y axes, customizable fraction display, and user-controlled signals.
+- UV absorbance display (280 and 260 nm)
+- Fraction markers and labeling
+- Secondary Y-axis selection (e.g., conductivity, pH, etc.)
+- Axis limits and font sizes
 
----
-
-## 🚀 Features
-
-- 📁 Upload `.zip`, `.res`, or `.result` files exported from AKTA UNICORN
-- 📊 Plot UV absorbance and any secondary signal (e.g., Conc B)
-- 🔁 Dual Y axes with customizable ranges
-- 🎯 Interactive controls for font sizes, axis limits, and tick labels
-- 🧪 Show or hide fractions with spacing, height, and label settings
-- 💻 Designed to run entirely in **Google Colab** using `ipywidgets`
+The app is built upon [proteovis](https://github.com/Tsuchihashi-ryo/proteovis), a fork of [PyCORN](https://github.com/pyahmed/PyCORN), and is designed for easy usage in a cloud environment.
 
 ---
 
-## 📎 Based on
+## ▶️ Launch in Colab
 
-This project builds upon:
+Click the badge below to open the app directly in Google Colab:
 
-- [`proteovis`](https://github.com/Tsuchihashi-ryo/proteovis) by [@Tsuchihashi-ryo](https://github.com/Tsuchihashi-ryo)
-- [`PyCORN`](https://github.com/pyahmed/PyCORN) by [@pyahmed](https://github.com/pyahmed)
-
-Many thanks to both authors for their open-source contributions.  
-We maintain all licenses and attributions accordingly.
-
-If you are using this notebook, please consider citing or acknowledging their work.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/josocjo/Colab-akta-chromatogram-viewer/blob/master/GUI_de_pycorn_funciona_v3_clean.ipynb)
 
 ---
 
-## 📦 Requirements
+## 🔗 Acknowledgements
 
-Install dependencies with:
+- **[PyCORN](https://github.com/pyahmed/PyCORN)** – Python Chromatogram Reader by [@pyahmed](https://github.com/pyahmed)
+- **[proteovis](https://github.com/Tsuchihashi-ryo/proteovis)** – Interactive visualization fork by [@Tsuchihashi-ryo](https://github.com/Tsuchihashi-ryo)
 
-```bash
-pip install -r requirements.txt
+---
+
+## 📝 License
+
+This viewer inherits the license from the original `proteovis` repository (MIT). Please refer to their repository for more details.
